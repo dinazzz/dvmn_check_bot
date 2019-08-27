@@ -1,12 +1,13 @@
 import requests
 import time
+import logging
 
 from requests.exceptions import ReadTimeout, ConnectionError
 from telegram_bot import send_message
 
 
 def get_lp_checklist(token, timestamp=None):
-    url = 'https://dvmn.org/api/long_polling//'
+    url = r'https://dvmn.org/api/long_polling/'
     headers = {'Authorization': f'Token {token}'}
     payload = {'timestamp': timestamp}
     response = requests.get(url=url, headers=headers, params=payload)
@@ -17,9 +18,10 @@ def get_lp_checklist(token, timestamp=None):
 def poll_dvmn(dvmn_token, bot_token, chat_id, timestamp):
     response = get_lp_checklist(dvmn_token, timestamp)
     if response['status'] == 'found':
-        text=parse_found_response(response['new_attempts'][0])
-        send_message(bot_token=bot_token, chat_id=chat_id, text=text)
-        timestamp = response['new_attempts'][0]['timestamp']
+        for attempt in response['new_attempts']:
+            text=parse_found_response(attempt)
+            send_message(bot_token=bot_token, chat_id=chat_id, text=text)
+        timestamp = response['last_attempt_timestamp']
     else:
         timestamp = response['timestamp_to_request']
     return timestamp
@@ -34,8 +36,8 @@ def parse_found_response(check_results):
     return f'У вас проверили работу "{lesson_title}"!\n\n{verdict}'
 
 
-
-def run_checker(dvmn_token, bot_token, chat_id):    
+def run_checker(dvmn_token, bot_token, chat_id):
+    logging.info('Бот запущен')
     timestamp = None
     while True:
         try:
