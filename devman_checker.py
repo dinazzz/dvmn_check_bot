@@ -60,15 +60,15 @@ def run_checker(dvmn_token, bot_token, chat_id, logger):
         try:
             a =0/0
             timestamp = poll_dvmn(dvmn_token, bot_token, chat_id, timestamp)
-        except ReadTimeout:
-            logger.exception()
+        except ReadTimeout as timeout_exc:
+            logger.exception(timeout_exc)
             continue
-        except ConnectionError:
-            logger.exception()
+        except ConnectionError as connection_exc:
+            logger.exception(connection_exc)
             time.sleep(300)
             continue
-        except ZeroDivisionError:
-            logger.exception()
+        except ZeroDivisionError as zero_div_exc:
+            logger.exception(zero_div_exc)
             time.sleep(20000)
             continue
 
