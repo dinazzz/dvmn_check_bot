@@ -1,9 +1,26 @@
 import requests
 import time
 import logging
+import telegram
 
 from requests.exceptions import ReadTimeout, ConnectionError
-from telegram_bot import send_message
+
+
+class MyLogsHandler(logging.Handler):
+
+    def __init__(self, bot_token, chat_id):
+        logging.Handler.__init__(self)
+        self.bot = telegram.Bot(bot_token)
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.bot.send_message(chat_id=self.chat_id, text=log_entry)
+
+
+def send_message(bot_token, chat_id, text):
+    bot = telegram.Bot(bot_token)
+    bot.send_message(chat_id=chat_id, text=text)
 
 
 def get_lp_checklist(token, timestamp=None):
@@ -36,14 +53,19 @@ def parse_found_response(check_results):
     return f'У вас проверили работу "{lesson_title}"!\n\n{verdict}'
 
 
-def run_checker(dvmn_token, bot_token, chat_id):
-    logging.info('Бот запущен')
+def run_checker(dvmn_token, bot_token, chat_id, logger):
+    logger.info('Бот запущен')
     timestamp = None
     while True:
         try:
             timestamp = poll_dvmn(dvmn_token, bot_token, chat_id, timestamp)
         except ReadTimeout:
+            logger.exception()
             continue
         except ConnectionError:
-            time.sleep(60)
+            logger.exception()
+            time.sleep(300)
             continue
+
+
+
