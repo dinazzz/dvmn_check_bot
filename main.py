@@ -14,7 +14,7 @@ if __name__ == '__main__':
     logger = logging.getLogger('my_logger')
     logger.setLevel(logging.INFO)
     logger.addHandler(MyLogsHandler(chat_id=chat_id, bot_token=TELEGRAM_BOT_TOKEN))
-    logger.info('Тут сработало')
+
     try:
         run_checker(DVMN_TOKEN, TELEGRAM_BOT_TOKEN, chat_id, logger)
     except HTTPError as http_exc:
