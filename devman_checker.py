@@ -2,8 +2,12 @@ import requests
 import time
 import logging
 import telegram
+import os
 
-from requests.exceptions import ReadTimeout, ConnectionError
+from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
+
+
+logger = logging.getLogger('dvmn_checker')
 
 
 class MyLogsHandler(logging.Handler):
@@ -53,7 +57,7 @@ def parse_found_response(check_results):
     return f'У вас проверили работу "{lesson_title}"!\n\n{verdict}'
 
 
-def run_checker(dvmn_token, bot_token, chat_id, logger):
+def run_checker(dvmn_token, bot_token, chat_id):
     logger.info('Бот запущен')
     timestamp = None
     while True:
@@ -68,4 +72,17 @@ def run_checker(dvmn_token, bot_token, chat_id, logger):
             continue
 
 
+if __name__ == '__main__':
+    dvmn_token = os.getenv('DVMN_TOKEN')
+    telegram_bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
+    chat_id = os.getenv('CHAT_ID')
 
+    logging.basicConfig(format='%(processName)s %(asctime)s %(message)s')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(MyLogsHandler(chat_id=chat_id, bot_token=telegram_bot_token))
+
+    try:
+        run_checker(dvmn_token, telegram_bot_token, chat_id)
+    except HTTPError as http_exc:
+        logger.error('Бот упал!')
+        logger.exception(http_exc)
