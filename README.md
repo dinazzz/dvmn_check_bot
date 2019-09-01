@@ -18,11 +18,11 @@ pip3 install -r requirements.txt
 ```editorconfig
 DVMN_TOKEN=bb69419a82f2612d01d3fca29c6bd82c90948b09
 TELEGRAM_BOT_TOKEN=950979960:AAHg8pP4pRlRq4N2fbo50Hi1tmfNsSPA0MU
-chat_id=199497834
+CHAT_ID=199497834
 ```
 Для запуска бота выполните в консоли команду
 ```python
-python3 main.py
+python3 devman_checker.py
 ```
 
 ### Деплой бота
